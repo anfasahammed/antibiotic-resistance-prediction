@@ -350,7 +350,7 @@ input, textarea {
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("C:\\Users\\anfas\\Downloads\\case comp\\Nigeria_encoded.csv")
+    df = pd.read_csv("Nigeria_encoded.csv")
     return df
 
 # Dark theme configuration for Plotly charts
