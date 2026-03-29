@@ -16,62 +16,36 @@ st.set_page_config(
 # COOL DARK THEME with Colorful Gradient Metrics
 st.markdown("""
     <style>
-    /* Hide Streamlit branding but KEEP sidebar button */
+    /* COMPLETELY HIDE the top header bar with all its contents */
     header[data-testid="stHeader"] {
-        background-color: transparent !important;
+        display: none !important;
+        visibility: hidden !important;
     }
     
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
-    /* Keep sidebar toggle visible but style it */
-    button[kind="header"] {
-        visibility: visible !important;
-        background-color: rgba(167, 139, 250, 0.3) !important;
-        color: #ffffff !important;
-        border-radius: 8px !important;
-    }
-    
-    button[kind="header"]:hover {
-        background-color: rgba(167, 139, 250, 0.6) !important;
-    }
     
     /* Remove top white bar */
     .block-container {
         padding-top: 1rem !important;
     }
     
-    /* Make sidebar collapse/expand button ALWAYS visible and bright */
-    [data-testid="collapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        border-radius: 0 12px 12px 0 !important;
-        padding: 15px 8px !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6) !important;
-        z-index: 999999 !important;
-    }
-    
-    [data-testid="collapsedControl"]:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.8) !important;
-        transform: translateX(2px);
-    }
-    
-    /* Make sidebar wider and more visible */
+    /* Force sidebar to ALWAYS be visible */
     [data-testid="stSidebar"] {
         min-width: 320px !important;
         max-width: 350px !important;
+        transform: none !important;
+        transition: none !important;
     }
     
-    [data-testid="stSidebar"][aria-expanded="true"] {
-        min-width: 320px !important;
+    [data-testid="stSidebar"][aria-expanded="false"] {
+        transform: translateX(0) !important;
+        margin-left: 0 !important;
     }
     
-    /* Force sidebar to be visible on load */
-    [data-testid="stSidebar"] > div:first-child {
-        width: 320px !important;
+    /* Hide the collapse button on the left edge since sidebar is always visible */
+    [data-testid="collapsedControl"] {
+        display: none !important;
     }
     
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -347,22 +321,36 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(167, 139, 250, 0.3);
     }
     </style>
-    
-    <script>
-    // Force sidebar to stay open
-    window.addEventListener('load', function() {
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar) {
-            sidebar.setAttribute('aria-expanded', 'true');
-        }
-    });
-    </script>
+""", unsafe_allow_html=True)
+# ✅ ADD HERE (exactly here)
+st.markdown("""
+<style>
+
+/* FIX DOUBLE KEYBOARD */
+div[data-baseweb="popover"] {
+    z-index: 9999 !important;
+}
+
+div[data-baseweb="select"] {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+input, textarea {
+    z-index: auto !important;
+}
+
+[data-testid="stAppViewContainer"] {
+    overflow: visible !important;
+}
+
+</style>
 """, unsafe_allow_html=True)
 
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"C:\Users\anfas\Downloads\case comp\Nigeria_encoded.csv")
+    df = pd.read_csv("C:\\Users\\anfas\\Downloads\\case comp\\Nigeria_encoded.csv")
     return df
 
 # Dark theme configuration for Plotly charts
@@ -399,16 +387,6 @@ def apply_dark_theme(fig):
 
 df = load_data()
 
-# Add a visual helper for sidebar
-st.markdown("""
-<div style="position: fixed; top: 10px; left: 10px; z-index: 999999; 
-     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-     padding: 8px 15px; border-radius: 20px; color: white; font-size: 0.9rem;
-     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6); cursor: pointer;">
-    ☰ Click here to open sidebar
-</div>
-""", unsafe_allow_html=True)
-
 # Title
 st.markdown('''
 <div class="main-header">
@@ -435,18 +413,19 @@ area_mapping = {
 area_reverse_mapping = {v: k for k, v in area_mapping.items()}
 
 # Location selection
-location = st.sidebar.selectbox(
-    "Select Patient Location",
-    options=["Select Location", "IFE", "OSU", "IWO", "EDE"],
-    index=0,
-    help="Choose the location where the sample was collected"
-)
+with st.sidebar:
+    location = st.selectbox(
+        "Select Patient Location",
+        options=["Select Location", "IFE", "OSU", "IWO", "EDE"],
+        index=0
+    )
 
 # Area selection (optional)
 show_area = st.sidebar.checkbox("Filter by Sample Collection Area", value=False)
 area_display = None
 if show_area:
-    area_display = st.sidebar.selectbox(
+    with st.sidebar:
+        area_display = st.selectbox(
         "Select Collection Area Type",
         options=["All"] + list(area_mapping.values()),
         index=0,
