@@ -525,7 +525,7 @@ if location != "Select Location":
         mdr_count = len(location_data[location_data['Resistance_Count'] >= 3])
         mdr_percentage = (mdr_count / total_patients) * 100
         st.metric(
-            label="MDR Cases",
+            label="High Resisitance(>=3)",
             value=f"{mdr_percentage:.1f}%",
             delta=f"{mdr_count}/{total_patients}"
         )
