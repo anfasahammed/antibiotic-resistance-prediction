@@ -64,11 +64,24 @@ FAMILY_COLORS = {
 }
 RSI_COLORS = {"R":"#ef4444","I":"#f59e0b","S":"#22c55e"}
 AGE_ORDER = ["Newborn","Child","Teenager","Young Adult","Senior Adult","Senior"]
+
+# ALL 15 ANTIBIOTICS MODEL DATA
 MODEL_DATA = [
-    ["Imipenem",      "CatBoost 1",0.988,0.987,"CatBoost 1",0.987,0.988],
-    ["Gentamicin",    "CatBoost 3",0.889,0.741,"CatBoost 2",0.785,0.824],
-    ["Amikacin",      "CatBoost 3",0.937,0.727,"CatBoost 2",0.829,0.806],
-    ["Ciprofloxacin", "CatBoost 3",0.920,0.531,"XGBoost",   0.612,0.820],
+    ["Amoxicillin / Ampicillin",  "CatBoost 1", 0.917, 0.763, "XGBoost",      0.766, 0.912],
+    ["Amoxicillin / Clavulanate", "CatBoost 1", 0.929, 0.781, "CatBoost 1",   0.781, 0.929],
+    ["Cefazolin",                 "CatBoost 1", 0.905, 0.754, "LightGBM",     0.761, 0.885],
+    ["Cefoxitin",                 "CatBoost 1", 0.931, 0.766, "CatBoost 1",   0.766, 0.931],
+    ["Cefotaxime / Ceftriaxone",  "XGBoost",    0.924, 0.774, "CatBoost 1",   0.780, 0.910],
+    ["Imipenem",                  "CatBoost 1", 0.988, 0.987, "CatBoost 1",   0.987, 0.988],
+    ["Gentamicin",                "CatBoost 3", 0.889, 0.741, "CatBoost 2",   0.785, 0.824],
+    ["Amikacin",                  "CatBoost 3", 0.937, 0.727, "CatBoost 2",   0.829, 0.806],
+    ["Nalidixic Acid",            "CatBoost 3", 0.928, 0.535, "CatBoost 2",   0.624, 0.852],
+    ["Ofloxacin",                 "CatBoost 3", 0.938, 0.530, "CatBoost 1",   0.601, 0.855],
+    ["Ciprofloxacin",             "CatBoost 3", 0.920, 0.531, "XGBoost",      0.612, 0.820],
+    ["Chloramphenicol",           "CatBoost 1", 0.942, 0.952, "CatBoost 2/3", 0.961, 0.931],
+    ["Cotrimoxazole",             "CatBoost 1", 0.940, 0.957, "CatBoost 2/3", 0.958, 0.936],
+    ["Nitrofurantoin",            "XGBoost",    0.905, 0.896, "CatBoost 2/3", 0.926, 0.875],
+    ["Colistin",                  "XGBoost",    0.948, 0.857, "CatBoost 3",   0.951, 0.910],
 ]
 MODEL_COLS = ["Antibiotic","Best Recall Model","Recall Score","F1 @ Best Recall","Best F1 Model","F1 Score","Recall @ Best F1"]
 
@@ -118,7 +131,7 @@ st.markdown("---")
 
 tab1,tab2,tab3,tab4,tab5 = st.tabs(["\U0001f4ca Overview","\U0001f52c Species Analysis","\U0001f48a Antibiotic Families","\U0001f464 Demographics","\U0001f916 Model Performance"])
 
-# ── TAB 1 ────────────────────────────────────────────────────────
+# TAB 1
 with tab1:
     st.markdown('<div class="section-header">Resistance Rate per Antibiotic</div>', unsafe_allow_html=True)
     resist_data = [{"Antibiotic":c.replace("_"," "),"Resistant %":round((filtered[c]=="R").mean()*100,1),"Intermediate %":round((filtered[c]=="I").mean()*100,1),"Sensitive %":round((filtered[c]=="S").mean()*100,1),"Family":col_to_family.get(c,"Other")} for c in ANTIBIOTIC_COLS]
@@ -158,7 +171,7 @@ with tab1:
         fig4.update_layout(xaxis_title="",yaxis_title="Samples",height=320,margin=dict(t=10,b=10),coloraxis_showscale=False,**PLOT_LAYOUT)
         st.plotly_chart(fig4,use_container_width=True)
 
-# ── TAB 2 ────────────────────────────────────────────────────────
+# TAB 2
 with tab2:
     st.markdown('<div class="section-header">Sample Count by Bacteria Species</div>', unsafe_allow_html=True)
     bac_df = filtered["Souches"].value_counts().reset_index()
@@ -184,7 +197,7 @@ with tab2:
         figh.update_xaxes(tickangle=-35)
         st.plotly_chart(figh,use_container_width=True)
 
-# ── TAB 3 ────────────────────────────────────────────────────────
+# TAB 3
 with tab3:
     st.markdown('<div class="section-header">Resistance Rate by Antibiotic Family</div>', unsafe_allow_html=True)
     fam_rows=[]
@@ -221,7 +234,7 @@ with tab3:
     figfd.update_layout(height=360,margin=dict(t=10,b=10),yaxis=dict(range=[0,101],title="%"),legend=dict(orientation="h",y=1.08),**PLOT_LAYOUT)
     st.plotly_chart(figfd,use_container_width=True)
 
-# ── TAB 4 ────────────────────────────────────────────────────────
+# TAB 4
 with tab4:
     c1,c2=st.columns(2)
     with c1:
@@ -299,38 +312,141 @@ with tab4:
         figmr.update_layout(height=300,margin=dict(t=5,b=5),coloraxis_showscale=False,xaxis_title="MultiResistance Score",**PLOT_LAYOUT)
         st.plotly_chart(figmr,use_container_width=True)
 
-# ── TAB 5 ────────────────────────────────────────────────────────
+# TAB 5 — MODEL PERFORMANCE (ALL 15 ANTIBIOTICS)
 with tab5:
-    st.markdown('<div class="section-header">Model Performance Summary</div>', unsafe_allow_html=True)
-    perf_df=pd.DataFrame(MODEL_DATA,columns=MODEL_COLS)
-    st.dataframe(perf_df.style.format({"Recall Score":"{:.3f}","F1 @ Best Recall":"{:.3f}","F1 Score":"{:.3f}","Recall @ Best F1":"{:.3f}"}).background_gradient(subset=["Recall Score","F1 @ Best Recall","F1 Score","Recall @ Best F1"],cmap="YlOrRd"),use_container_width=True,hide_index=True,height=200)
+    perf_df = pd.DataFrame(MODEL_DATA, columns=MODEL_COLS)
 
-    st.markdown('<div class="section-header">F1 vs Recall Trade-off</div>', unsafe_allow_html=True)
-    c1,c2=st.columns(2)
-    with c1:
-        figp=go.Figure()
-        figp.add_trace(go.Bar(name="Best Recall Score",x=perf_df["Antibiotic"],y=perf_df["Recall Score"],marker_color="#f97316",text=perf_df["Recall Score"].round(3),textposition="outside"))
-        figp.add_trace(go.Bar(name="Best F1 Score",x=perf_df["Antibiotic"],y=perf_df["F1 Score"],marker_color="#38bdf8",text=perf_df["F1 Score"].round(3),textposition="outside"))
-        figp.update_layout(barmode="group",template="plotly_dark",yaxis=dict(range=[0,1.12],title="Score"),xaxis_title="Antibiotic",legend=dict(orientation="h",y=1.1,x=0),margin=dict(t=30,b=10),height=380,**PLOT_LAYOUT)
-        st.plotly_chart(figp,use_container_width=True)
-    with c2:
-        sdf=pd.DataFrame({"Antibiotic":perf_df["Antibiotic"].tolist()*2,"F1":perf_df["F1 @ Best Recall"].tolist()+perf_df["F1 Score"].tolist(),"Recall":perf_df["Recall Score"].tolist()+perf_df["Recall @ Best F1"].tolist(),"Mode":["Best Recall"]*4+["Best F1"]*4})
-        figs=px.scatter(sdf,x="Recall",y="F1",color="Mode",symbol="Antibiotic",color_discrete_map={"Best Recall":"#f97316","Best F1":"#38bdf8"},template="plotly_dark",text="Antibiotic")
-        figs.update_traces(marker_size=12,textposition="top center")
-        figs.update_layout(height=380,margin=dict(t=10,b=10),xaxis=dict(range=[0.4,1.05],title="Recall"),yaxis=dict(range=[0.4,1.05],title="F1 Score"),legend=dict(orientation="h",y=1.08),**PLOT_LAYOUT)
-        st.plotly_chart(figs,use_container_width=True)
+    st.markdown('<div class="section-header">Model Performance Summary — All 15 Antibiotics</div>', unsafe_allow_html=True)
 
+    # Full styled table — tall enough to show all 15 rows without scrolling
+    st.dataframe(
+        perf_df.style
+            .format({"Recall Score":"{:.3f}","F1 @ Best Recall":"{:.3f}","F1 Score":"{:.3f}","Recall @ Best F1":"{:.3f}"})
+            .background_gradient(subset=["Recall Score","F1 @ Best Recall","F1 Score","Recall @ Best F1"], cmap="YlOrRd"),
+        use_container_width=True,
+        hide_index=True,
+        height=600,
+    )
+
+    # Chart 1: Grouped bar — all 15 antibiotics, 4 metrics
+    st.markdown('<div class="section-header">Recall & F1 Scores — All 15 Antibiotics</div>', unsafe_allow_html=True)
+
+    fig_bar = go.Figure()
+    fig_bar.add_trace(go.Bar(
+        name="Best Recall Score",
+        x=perf_df["Antibiotic"], y=perf_df["Recall Score"],
+        marker_color="#f97316",
+        text=perf_df["Recall Score"].round(3), textposition="outside", textfont=dict(size=9),
+    ))
+    fig_bar.add_trace(go.Bar(
+        name="F1 @ Best Recall",
+        x=perf_df["Antibiotic"], y=perf_df["F1 @ Best Recall"],
+        marker_color="#fb923c", opacity=0.80,
+        text=perf_df["F1 @ Best Recall"].round(3), textposition="outside", textfont=dict(size=9),
+    ))
+    fig_bar.add_trace(go.Bar(
+        name="Best F1 Score",
+        x=perf_df["Antibiotic"], y=perf_df["F1 Score"],
+        marker_color="#38bdf8",
+        text=perf_df["F1 Score"].round(3), textposition="outside", textfont=dict(size=9),
+    ))
+    fig_bar.add_trace(go.Bar(
+        name="Recall @ Best F1",
+        x=perf_df["Antibiotic"], y=perf_df["Recall @ Best F1"],
+        marker_color="#7dd3fc", opacity=0.80,
+        text=perf_df["Recall @ Best F1"].round(3), textposition="outside", textfont=dict(size=9),
+    ))
+    fig_bar.update_layout(
+        barmode="group",
+        template="plotly_dark",
+        height=560,
+        yaxis=dict(range=[0, 1.15], title="Score", tickformat=".2f", gridcolor="#1e3a52"),
+        xaxis=dict(title="", tickangle=-38, tickfont=dict(size=10)),
+        legend=dict(orientation="h", y=1.06, x=0, font=dict(size=11)),
+        margin=dict(t=40, b=10, l=10, r=10),
+        font=dict(color="#cbd5e1"),
+        **PLOT_LAYOUT,
+    )
+    st.plotly_chart(fig_bar, use_container_width=True)
+
+    # Chart 2: Score Heatmap
+    st.markdown('<div class="section-header">Score Heatmap — All Antibiotics × All Metrics</div>', unsafe_allow_html=True)
+
+    heat_data = perf_df[["Antibiotic","Recall Score","F1 @ Best Recall","F1 Score","Recall @ Best F1"]].set_index("Antibiotic")
+    fig_heat = px.imshow(
+        heat_data,
+        color_continuous_scale="RdYlGn",
+        zmin=0.5, zmax=1.0,
+        text_auto=".3f",
+        aspect="auto",
+        template="plotly_dark",
+    )
+    fig_heat.update_layout(
+        height=560,
+        margin=dict(t=20, b=10, l=10, r=10),
+        xaxis=dict(title="", tickfont=dict(size=13), side="bottom"),
+        yaxis=dict(title="", tickfont=dict(size=11)),
+        coloraxis_colorbar=dict(title="Score", tickformat=".2f"),
+        font=dict(color="#cbd5e1"),
+        **PLOT_LAYOUT,
+    )
+    fig_heat.update_traces(textfont=dict(size=11))
+    st.plotly_chart(fig_heat, use_container_width=True)
+
+    # Chart 3: Scatter — F1 vs Recall trade-off
+    st.markdown('<div class="section-header">F1 vs Recall Trade-off (All 15 Antibiotics)</div>', unsafe_allow_html=True)
+
+    scatter_rows = []
+    for _, row in perf_df.iterrows():
+        scatter_rows.append({"Antibiotic": row["Antibiotic"], "Recall": row["Recall Score"],    "F1": row["F1 @ Best Recall"], "Mode": "Best Recall", "Model": row["Best Recall Model"]})
+        scatter_rows.append({"Antibiotic": row["Antibiotic"], "Recall": row["Recall @ Best F1"],"F1": row["F1 Score"],          "Mode": "Best F1",     "Model": row["Best F1 Model"]})
+    sdf = pd.DataFrame(scatter_rows)
+
+    figs = px.scatter(
+        sdf, x="Recall", y="F1",
+        color="Mode", symbol="Mode",
+        text="Antibiotic",
+        hover_data=["Model"],
+        color_discrete_map={"Best Recall":"#f97316","Best F1":"#38bdf8"},
+        template="plotly_dark",
+    )
+    figs.update_traces(marker_size=13, textposition="top center", textfont=dict(size=9))
+    figs.add_shape(type="line", x0=0.45, y0=0.45, x1=1.04, y1=1.04,
+                   line=dict(color="#334155", dash="dot", width=1))
+    figs.update_layout(
+        height=560,
+        margin=dict(t=20, b=10, l=10, r=10),
+        xaxis=dict(range=[0.45, 1.04], title="Recall", gridcolor="#1e3a52", tickformat=".2f"),
+        yaxis=dict(range=[0.45, 1.04], title="F1 Score", gridcolor="#1e3a52", tickformat=".2f"),
+        legend=dict(orientation="h", y=1.06, x=0, font=dict(size=12)),
+        font=dict(color="#cbd5e1"),
+        **PLOT_LAYOUT,
+    )
+    st.plotly_chart(figs, use_container_width=True)
+
+    # Per-antibiotic expandable cards in 3 columns
     st.markdown('<div class="section-header">Per-Antibiotic Model Detail</div>', unsafe_allow_html=True)
-    for _,row in perf_df.iterrows():
-        with st.expander(f"**{row['Antibiotic']}**"):
-            d1,d2,d3,d4=st.columns(4)
-            d1.metric("Best Recall Model",row["Best Recall Model"])
-            d2.metric("Recall Score",f"{row['Recall Score']:.3f}")
-            d3.metric("Best F1 Model",row["Best F1 Model"])
-            d4.metric("F1 Score",f"{row['F1 Score']:.3f}")
+    cols_exp = st.columns(3)
+    for i, (_, row) in enumerate(perf_df.iterrows()):
+        with cols_exp[i % 3]:
+            with st.expander(f"**{row['Antibiotic']}**"):
+                d1, d2 = st.columns(2)
+                d1.metric("Best Recall Model", row["Best Recall Model"])
+                d2.metric("Recall Score", f"{row['Recall Score']:.3f}")
+                d3, d4 = st.columns(2)
+                d3.metric("Best F1 Model", row["Best F1 Model"])
+                d4.metric("F1 Score", f"{row['F1 Score']:.3f}")
+                d5, d6 = st.columns(2)
+                d5.metric("F1 @ Best Recall", f"{row['F1 @ Best Recall']:.3f}")
+                d6.metric("Recall @ Best F1", f"{row['Recall @ Best F1']:.3f}")
 
 st.markdown("---")
 with st.expander("\U0001f4cb Raw Data Explorer"):
     st.write(f"**{len(filtered):,} rows x {len(filtered.columns)} columns**")
-    st.dataframe(filtered.head(300),use_container_width=True)
-    st.download_button(label="Download filtered CSV",data=filtered.to_csv(index=False).encode("utf-8"),file_name="filtered_resistance_data.csv",mime="text/csv")
+    st.dataframe(filtered.head(300), use_container_width=True)
+    st.download_button(
+        label="Download filtered CSV",
+        data=filtered.to_csv(index=False).encode("utf-8"),
+        file_name="filtered_resistance_data.csv",
+        mime="text/csv",
+    )
