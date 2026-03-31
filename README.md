@@ -171,7 +171,28 @@ Models were trained to predict resistance (R vs. non-R) for 4 key antibiotics us
 
 **Features used:** Bacteria species, age category, gender, diabetes, hypertension, hospital history, infection frequency, other antibiotic results (cross-resistance features)
 
-**Why Recall was prioritised:** In a clinical AMR context, a false negative (predicting Susceptible when actually Resistant) is more dangerous than a false positive. Missing a resistant case could lead to treatment failure. Recall was therefore the primary optimization metric.
+### Why Recall Was Prioritised Over Precision
+
+In a clinical AMR context, **a false negative (predicting Susceptible when the bacteria is actually Resistant) is more dangerous than a false positive**. Recall was therefore chosen as the primary optimization metric.
+
+**The two types of errors and their consequences:**
+
+| Error Type | What Happens | Clinical Consequence |
+|---|---|---|
+| **False Negative** (low recall) | Model predicts *Susceptible* — bacteria is actually *Resistant* | Doctor prescribes an ineffective antibiotic → treatment fails → infection spreads → patient deteriorates |
+| **False Positive** (low precision) | Model predicts *Resistant* — bacteria is actually *Susceptible* | Doctor switches to an alternative antibiotic → patient is still treated effectively, just with a different drug |
+
+**Concrete clinical example:**
+
+Imagine a patient with a *Klebsiella pneumoniae* infection, and the model is predicting Ciprofloxacin resistance:
+
+- **Scenario A — False Negative (dangerous):** The model predicts *Susceptible*. The doctor prescribes Ciprofloxacin. The bacteria is actually resistant. The antibiotic does nothing. The infection spreads. The patient enters sepsis. By the time the lab culture confirms resistance (48–72 hours later), it may be too late.
+
+- **Scenario B — False Positive (manageable):** The model predicts *Resistant*. The doctor switches to Gentamicin instead. The bacteria was actually susceptible to Ciprofloxacin — but Gentamicin also works. The patient recovers. The only cost was using a second-choice drug unnecessarily.
+
+A false negative costs lives. A false positive costs a prescription change. That asymmetry is exactly why **recall is the primary optimization metric** across all four antibiotics in this project — and why Imipenem, as the last-resort antibiotic, demands near-perfect recall above all others.
+
+---
 
 ---
 
@@ -201,6 +222,12 @@ The two bacterial species present in the secondary  dataset — ***Enterobacteri
 Attempting to query CARD for these species returns no matching gene-level data. Feeding zero-value gene feature vectors into a machine learning model is **not meaningfully zero — it is a data artifact**, and the model would learn from the absence of data rather than from true biological signals. This would produce misleading results and scientifically invalid predictions.
 
 Therefore, CARD integration was excluded to preserve data integrity. The models were trained solely on phenotypic susceptibility data (R/I/S outcomes), which is both sufficient and scientifically sound for the scope of this project.
+
+
+
+## Why Imipenem Receives the Highest Modeling Priority
+
+Imipenem is a **carbapenem-class antibiotic** — widely regarded as a **last-resort treatment**, meaning it is only used when all other antibiotics have failed. Among all four antibiotics modeled, Imipenem achieves both the **highest recall (0.988) and the highest F1 score (0.987)**, making it the most reliably predicted antibiotic in the system.
 
 ---
 
