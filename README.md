@@ -198,7 +198,7 @@ A false negative costs lives. A false positive costs a prescription change. That
 
 ##  Data Preprocessing
 
-### Primary Dataset (`antibiotic-resistance-raw-dataset-cleaning.ipynb`)
+###  Dataset A
 - Dropped patient name, ID, and free-text columns
 - Standardized bacterial species names to full scientific names
 - Filled or dropped missing susceptibility values
@@ -206,7 +206,7 @@ A false negative costs lives. A false positive costs a prescription change. That
 - Computed `MultiResistance` score (count of R labels per row)
 - Final columns: Souches, patient features, 15 antibiotic columns (R/I/S), Age, Gender, AgeCategory, MultiResistance
 
-### Secondary Dataset (`)
+###  Dataset B
 - Converted raw zone diameter or categorical values to R/I/S using standard CLSI/EUCAST breakpoints
 - Computed `Resistance_Count` and `Resistance_Level` (N = None/Low, HR = High Resistance, VHR, XHR)
 - Retained: Location, Area, 5 antibiotic columns, Resistance_Count, Resistance_Level
