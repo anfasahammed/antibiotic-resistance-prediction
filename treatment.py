@@ -81,25 +81,44 @@ div[aria-selected="true"] {
 # -----------------------
 df = pd.read_csv("cleaned_antibiotic_resistance_dataset.csv")
 
-antibiotics = [
-    "AMX/AMP", "AMC", "CZ", "FOX", "CTX/CRO", "IPM",
-    "GEN", "AN", "Acide nalidixique", "ofx", "CIP",
-    "C", "Co-trimoxazole", "Furanes", "colistine"
+antibiotics =  [
+    'Amoxicillin_Ampicillin',
+    'Amoxicillin_Clavulanate',
+    'Cefazolin',
+    'Cefoxitin',
+    'Cefotaxime_Ceftriaxone',
+    'Imipenem',
+    'Gentamicin',
+    'Amikacin',
+    'Nalidixic_Acid',
+    'Ofloxacin',
+    'Ciprofloxacin',
+    'Chloramphenicol',
+    'Cotrimoxazole',
+    'Nitrofurantoin',
+    'Colistin'
 ]
 
 # -----------------------
 # ANTIBIOTIC CLASSES (FOR MDR)
 # -----------------------
 antibiotic_class = {
-    "CIP": "Fluoroquinolone", "ofx": "Fluoroquinolone", "Acide nalidixique": "Fluoroquinolone",
-    "GEN": "Aminoglycoside", "AN": "Aminoglycoside",
-    "AMC": "Beta_lactam", "AMX/AMP": "Beta_lactam", "CZ": "Beta_lactam",
-    "FOX": "Beta_lactam", "CTX/CRO": "Beta_lactam", "IPM": "Beta_lactam",
-    "Co-trimoxazole": "Folate",
-    "Furanes": "Nitrofuran",
-    "colistine": "Polymyxin",
-    "C": "Chloramphenicol"
-}
+        'Amoxicillin_Ampicillin':'Beta_lactams',
+        'Amoxicillin_Clavulanate':'Beta_lactams',
+        'Cefazolin':'Beta_lactams',
+        'Cefoxitin':'Beta_lactams',
+        'Cefotaxime_Ceftriaxone':'Beta_lactams',
+        'Imipenem':'Carbapenems',
+        'Gentamicin':'Aminoglycosides',
+        'Amikacin':'Aminoglycosides',
+        'Nalidixic_Acid':'Fluoroquinolones',
+        'Ofloxacin':"Fluoroquinolones",
+        'Ciprofloxacin':"Fluoroquinolones",
+        'Chloramphenicol':"Phenicols",
+        'Cotrimoxazole':"Folate_pathway_inhibitors",
+        'Nitrofurantoin':"Nitrofurans",
+        'Colistin':"Polymyxins"
+    }
 
 # -----------------------
 # HEADER
